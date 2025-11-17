@@ -1,0 +1,44 @@
+2025-11-17 04:45:11 | INFO | MissAV domain is missav.ai
+2025-11-17 13:22:21 | INFO | missav domain: missav.ai
+2025-11-17 13:23:11 | INFO | 开始下载任务: AVSA-148
+2025-11-17 13:23:11 | INFO | 开始下载: AVSA-148
+2025-11-17 13:23:11 | DEBUG | db_path: ./db/downloaded.db, table_name: MissAV
+2025-11-17 13:23:12 | INFO | 尝试使用下载器: MissAV
+2025-11-17 13:23:12 | DEBUG | fetch url: https://missav.ai/cn/avsa-148-uncensored-leak
+2025-11-17 13:23:13 | DEBUG | [(8243395, '1920x1080', '1080p/video.m3u8'), (4734395, '1280x720', '720p/video.m3u8'), (2444966, '854x480', '480p/video.m3u8'), (1417568, '640x360', '360p/video.m3u8')]
+2025-11-17 13:23:13 | DEBUG | 最高清晰度: 1280x720
+M3U8链接: https://surrit.com/a7a15003-87da-41c0-838e-9ed8443f7170/720p/video.m3u8
+2025-11-17 13:23:13 | INFO | 已保存到download_info.json
+2025-11-17 13:23:13 | INFO | 元数据: === 元数据详情 ===
+番号: AVSA-148
+标题: 渴望巨乳 屁股 湿摇 摩擦 讨厌的 Mako Oda 淫秽妄想一个不喜欢奶屁股的变态男人 - 织田真子
+M3U8: https://surrit.com/a7a15003-87da-41c0-838e-9ed8443f7170/720p/video.m3u8
+2025-11-17 13:23:13 | INFO | 不使用代理
+2025-11-17 13:23:13 | DEBUG | D:\APP\NASSAVx/tools/m3u8-Downloader-Go.exe -u https://surrit.com/a7a15003-87da-41c0-838e-9ed8443f7170/720p/video.m3u8 -o ./vol2/1000/MissAV\AVSA-148\AVSA-148.ts -H Referer:http://missav.ai
+2025-11-17 13:39:36 | DEBUG | D:\APP\NASSAVx/tools/ffmpeg.exe -i ./vol2/1000/MissAV\AVSA-148\AVSA-148.ts -c copy -f mp4 ./vol2/1000/MissAV\AVSA-148\AVSA-148.mp4
+2025-11-17 13:39:44 | ERROR | 下载视频失败: https://surrit.com/a7a15003-87da-41c0-838e-9ed8443f7170/720p/video.m3u8
+2025-11-17 13:39:44 | INFO | 尝试使用下载器: Memo
+2025-11-17 13:39:44 | DEBUG | https://memojav.com/hls/get_video_info.php?id=AVSA-148&sig=NTg1NTczNg&sts=7264825
+2025-11-17 13:39:44 | DEBUG | fetch url: https://memojav.com/hls/get_video_info.php?id=AVSA-148&sig=NTg1NTczNg&sts=7264825
+2025-11-17 13:39:45 | DEBUG | for (;;);{"success":false,"reason":"An error occurred. Please try again later"}
+2025-11-17 13:39:45 | ERROR | 解析元数据失败
+2025-11-17 13:39:45 | ERROR | 获取 AVSA-148 元数据失败
+2025-11-17 13:39:45 | INFO | 尝试使用下载器: Jable
+2025-11-17 13:39:45 | DEBUG | https://jable.tv/videos/avsa-148/
+2025-11-17 13:39:45 | DEBUG | fetch url: https://jable.tv/videos/avsa-148/
+2025-11-17 13:39:45 | ERROR | 请求失败: HTTP Error 404: 
+2025-11-17 13:39:45 | ERROR | 获取html失败
+2025-11-17 13:39:45 | ERROR | 获取 AVSA-148 元数据失败
+2025-11-17 13:39:45 | INFO | 尝试使用下载器: KanAV
+2025-11-17 13:39:45 | DEBUG | https://kanav.info/index.php/vod/search.html?wd=AVSA-148&by=time_add
+2025-11-17 13:39:45 | DEBUG | fetch url: https://kanav.info/index.php/vod/search.html?wd=AVSA-148&by=time_add
+2025-11-17 13:39:48 | ERROR | 获取html失败
+2025-11-17 13:39:48 | ERROR | 获取 AVSA-148 元数据失败
+2025-11-17 13:39:48 | INFO | 尝试使用下载器: HohoJ
+2025-11-17 13:39:48 | DEBUG | searchUrl: https://hohoj.tv/search?text=AVSA-148
+2025-11-17 13:39:48 | DEBUG | fetch url: https://hohoj.tv/search?text=AVSA-148
+2025-11-17 13:39:50 | ERROR | 获取html失败
+2025-11-17 13:39:50 | ERROR | 获取 AVSA-148 元数据失败
+2025-11-17 13:39:50 | ERROR | 下载 AVSA-148 时发生错误: 所有下载器都无法获取 AVSA-148 的元数据
+2025-11-17 13:39:50 | ERROR | 任务失败AVSA-148: 所有下载器都无法获取 AVSA-148 的元数据
+2025-11-17 13:39:50 | INFO | 等待828秒后继续下一个任务
