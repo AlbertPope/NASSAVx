@@ -18,10 +18,43 @@ class MissAVDownloader(Downloader):
 
         for url in urls_to_try:
             content = self._fetch_html(url)
-            if content:
+            if content and self._is_valid_content(content, avid):
+                logger.info(f"找到有效页面: {url}")
                 return content
+            else:
+                logger.warning(f"无法获取页面内容: {url}")
 
         return None
+
+    def _is_valid_content(self, content: str, avid: str) -> bool:
+        """检查页面内容是否有效（不是404页面）"""
+        # 检查明显的404错误页面特征
+        error_indicators = [
+            "404", "Not Found", "Page Not Found", "找不到页面"
+        ]
+
+        for indicator in error_indicators:
+            if indicator.lower() in content.lower():
+                return False
+
+        # 检查是否有视频相关的关键词
+        video_indicators = [
+            "m3u8", "video", "play", "watch", "播放",
+            "download", "下载", "player"
+        ]
+
+        # 如果包含视频相关关键词，认为是有效页面
+        for indicator in video_indicators:
+            if indicator.lower() in content.lower():
+                return True
+
+        # 检查是否包含番号（不区分大小写）
+        if avid.lower() in content.lower():
+            return True
+
+        # 如果没有明确的视频特征但也没有404特征，保守起见认为有效
+        # 让解析函数进一步判断
+        return True
 
     def parseHTML(self, html: str) -> Optional[AVDownloadInfo]:
         '''需要实现的方法：根据html，解析出元数据，返回AVMetadata'''
