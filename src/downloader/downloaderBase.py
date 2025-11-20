@@ -8,6 +8,7 @@ from typing import Optional
 from curl_cffi import requests
 
 from src.comm import *
+from src.util.request_handler import RequestHandler, CFHandler
 
 
 # 下载信息，只保留最基础的信息。只需要填写avid，其他字段用于调试，选填
@@ -37,12 +38,6 @@ class AVDownloadInfo:
             logger.error(f"JSON序列化失败: {str(e)}")
             return False
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5"
-}
-
 class Downloader(ABC):
     """
     使用方式：
@@ -61,6 +56,9 @@ class Downloader(ABC):
             'https': proxy
         } if proxy else None
         self.timeout = timeout
+        # 初始化请求处理器
+        self.request_handler = RequestHandler()
+        self.cf_handler = CFHandler()
 
     def setDomain(self, domain: str) -> bool:
         if domain:
@@ -269,20 +267,30 @@ class Downloader(ABC):
             return False
 
     def _fetch_html(self, url: str, referer: str = "") -> Optional[str]:
+        """使用新的请求处理器获取HTML内容"""
         logger.debug(f"fetch url: {url}")
-        try:
-            newHeader = headers
-            if referer:
-                newHeader["Referer"] = referer
-            response = requests.get(
-                url,
-                proxies=self.proxies,
-                headers=newHeader,
-                timeout=self.timeout,
-                impersonate="chrome110" # 可选：chrome, chrome110, edge99, safari15_5
-            )
-            response.raise_for_status()
-            return response.text
-        except requests.exceptions.RequestException as e:
-            logger.error(f"请求失败: {str(e)}")
-            return None
+
+        # 首先尝试使用普通请求处理器
+        content_bytes = self.request_handler.get(url)
+        if content_bytes:
+            content = content_bytes.decode('utf-8', errors='ignore')
+            # 检查是否触发了Cloudflare验证
+            if "Just a moment" in content or "Checking your browser" in content:
+                logger.info("检测到Cloudflare验证，切换到浏览器模式...")
+                # 使用浏览器模式绕过Cloudflare
+                content_bytes = self.cf_handler.get(url)
+                if content_bytes:
+                    return content_bytes.decode('utf-8', errors='ignore')
+                else:
+                    logger.error("浏览器模式获取内容失败")
+                    return None
+            return content
+        else:
+            logger.info("普通请求失败，尝试使用浏览器模式...")
+            # 普通请求失败，尝试浏览器模式
+            content_bytes = self.cf_handler.get(url)
+            if content_bytes:
+                return content_bytes.decode('utf-8', errors='ignore')
+            else:
+                logger.error("所有请求方式都失败")
+                return None

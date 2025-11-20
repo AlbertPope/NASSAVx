@@ -9,21 +9,17 @@ class MissAVDownloader(Downloader):
 
     def getHTML(self, avid: str) -> Optional[str]:
         '''需要实现的方法：根据avid，构造url并请求，获取html, 返回字符串'''
-        url = f'https://{self.domain}/{avid}-uncensored-leak'.lower()
-        content = self._fetch_html(url)
-        if content: return content
+        urls_to_try = [
+            f'https://{self.domain}/{avid}-uncensored-leak'.lower(),
+            f'https://{self.domain}/{avid}-chinese-subtitle'.lower(),
+            f'https://{self.domain}/{avid}'.lower(),
+            f'https://{self.domain}/dm13/{avid}'.lower()
+        ]
 
-        url = f'https://{self.domain}/{avid}-chinese-subtitle'.lower()
-        content = self._fetch_html(url)
-        if content: return content
-
-        url = f'https://{self.domain}/{avid}'.lower()
-        content = self._fetch_html(url)
-        if content: return content
-
-        url = f'https://{self.domain}/dm120/{avid}'.lower()
-        content = self._fetch_html(url)
-        if content: return content
+        for url in urls_to_try:
+            content = self._fetch_html(url)
+            if content:
+                return content
 
         return None
 
@@ -85,9 +81,14 @@ class MissAVDownloader(Downloader):
     @staticmethod
     def _get_highest_quality_m3u8(playlist_url: str) -> Optional[Tuple[str, str]]:
         try:
-            response = requests.get(playlist_url, timeout=10, impersonate="chrome110")
-            response.raise_for_status()
-            playlist_content = response.text
+            # 使用新的请求处理器获取m3u8播放列表
+            from src.util.request_handler import RequestHandler
+            handler = RequestHandler()
+            response_bytes = handler.get(playlist_url)
+            if not response_bytes:
+                return None
+
+            playlist_content = response_bytes.decode('utf-8')
 
             streams = []
             url_720 = None
