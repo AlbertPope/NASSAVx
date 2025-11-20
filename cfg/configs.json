@@ -8,13 +8,13 @@
     "Downloader": [
         {
             "downloaderName": "MissAV",
-            "domain": "missav.ai",
+            "domain": "missav.ws",
             "weight": 1000
         },
         {
             "downloaderName": "Jable",
             "domain": "jable.tv",
-            "weight": 500
+            "weight": 300
         },
         {
             "downloaderName": "HohoJ",
@@ -24,7 +24,7 @@
         {
             "downloaderName": "Memo",
             "domain": "memojav.com",
-            "weight": 600
+            "weight": 0
         },
         {
             "downloaderName": "KanAV",

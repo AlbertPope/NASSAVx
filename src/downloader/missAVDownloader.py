@@ -9,19 +9,19 @@ class MissAVDownloader(Downloader):
 
     def getHTML(self, avid: str) -> Optional[str]:
         '''需要实现的方法：根据avid，构造url并请求，获取html, 返回字符串'''
-        url = f'https://{self.domain}/cn/{avid}-uncensored-leak'.lower()
+        url = f'https://{self.domain}/{avid}-uncensored-leak'.lower()
         content = self._fetch_html(url)
         if content: return content
 
-        url = f'https://{self.domain}/cn/{avid}-chinese-subtitle'.lower()
+        url = f'https://{self.domain}/{avid}-chinese-subtitle'.lower()
         content = self._fetch_html(url)
         if content: return content
 
-        url = f'https://{self.domain}/cn/{avid}'.lower()
+        url = f'https://{self.domain}/{avid}'.lower()
         content = self._fetch_html(url)
         if content: return content
 
-        url = f'https://{self.domain}/dm13/cn/{avid}'.lower()
+        url = f'https://{self.domain}/dm120/{avid}'.lower()
         content = self._fetch_html(url)
         if content: return content
 

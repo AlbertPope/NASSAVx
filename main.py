@@ -4,14 +4,20 @@ import threading
 import time
 from typing import Dict, List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from src import downloader_service
 from src.comm import *
 
 app = FastAPI(title="流媒体下载器", description="管理视频下载任务")
+
+# 挂载静态文件和模板
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 # 数据模型
 class DownloadTask(BaseModel):
@@ -196,215 +202,9 @@ download_thread = threading.Thread(target=download_worker, daemon=True)
 download_thread.start()
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root():
+async def read_root(request: Request):
     """主页面"""
-    return """
-    <!doctype html>
-    <html>
-    <head>
-        <title>流媒体下载器</title>
-        <meta charset="utf-8">
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            .container { max-width: 800px; margin: 0 auto; }
-            .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-            .task-form { display: flex; gap: 10px; margin-bottom: 20px; }
-            input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-            button { padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-            button:hover { background: #0056b3; }
-            .task-list { list-style: none; padding: 0; }
-            .task-item { padding: 8px; margin: 5px 0; background: #f8f9fa; border-radius: 4px; }
-            .status-pending { border-left: 4px solid #ffc107; }
-            .status-downloading { border-left: 4px solid #007bff; }
-            .status-completed { border-left: 4px solid #28a745; }
-            .status-failed { border-left: 4px solid #dc3545; }
-            .current-task { background: #e3f2fd; font-weight: bold; }
-            .log-container { max-height: 400px; overflow-y: auto; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.4; }
-            .log-entry { margin: 2px 0; white-space: pre-wrap; }
-            .log-info { color: #569cd6; }
-            .log-error { color: #f44747; }
-            .log-debug { color: #ce9178; }
-            .log-warning { color: #ffcc00; }
-            .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-            .control-buttons { display: flex; gap: 10px; margin-top: 10px; }
-            @media (max-width: 768px) {
-                .two-column { grid-template-columns: 1fr; }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>视频下载管理器</h1>
-            
-            <div class="section">
-                <h2>添加下载任务</h2>
-                <div class="task-form">
-                    <input type="text" id="avidInput" placeholder="输入视频番号 (如: AAA-111)" />
-                    <button class="btn-primary" onclick="addTask()">添加任务</button>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>当前下载状态</h2>
-                <div id="currentTask">无任务</div>
-                <div class="control-buttons">
-                    <button class="btn-danger" id="stopButton" onclick="stopTask()" disabled>停止当前任务</button>
-                </div>
-            </div>
-
-            <div class="two-column">
-                <div class="section">
-                    <h2>任务状态</h2>
-                    
-                    <h3>下载队列</h3>
-                    <ul class="task-list" id="queueList"></ul>
-                    
-                    <h3>已完成任务</h3>
-                    <ul class="task-list" id="completedList"></ul>
-                    
-                    <h3>失败任务</h3>
-                    <ul class="task-list" id="failedList"></ul>
-                </div>
-
-                <div class="section">
-                    <h2>实时控制台输出</h2>
-                    <div class="log-container" id="logContainer">
-                        <div class="log-entry">系统启动中...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    
-    <script>
-        async function addTask() {
-            const avid = document.getElementById('avidInput').value.trim();
-            if (!avid) {
-                alert('请输入番号');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/tasks/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ avid: avid })
-                });
-                if (response.ok) {
-                    document.getElementById('avidInput').value = '';
-                    updateStatus();
-                } else {
-                    alert('添加任务失败');
-                }
-            } catch (error) {
-                alert('网络错误: ' + error);
-            }
-        }
-        
-        async function stopTask() {
-            if (!confirm('确定要停止当前任务吗？')) {
-                return;
-            }
-            try {
-                    const response = await fetch('/stop/', {
-                        method: 'POST'
-                    });
-                    
-                    if (response.ok) {
-                        alert('已发送停止请求');
-                        updateStatus();
-                    } else {
-                        alert('停止请求失败');
-                    }
-                } catch (error) {
-                    alert('网络错误: ' + error);
-                }
-            }
-        
-        async function updateStatus() {
-                try {
-                    const response = await fetch('/status/');
-                    const data = await response.json();
-                    
-                    // 更新当前任务
-                    const currentTaskEl = document.getElementById('currentTask');
-                    const stopButton = document.getElementById('stopButton');
-                    
-                    if (data.current_task) {
-                        currentTaskEl.textContent = '当前任务: ${data.current_task}';
-                        currentTaskEl.className = 'current-task';
-                        stopButton.disabled = false;
-                    } else {
-                        currentTaskEl.textContent = '无任务';
-                        currentTaskEl.className = '';
-                        stopButton.disabled = true;
-                    }
-                    
-                    // 更新队列
-                    updateList('queueList', data.queue);
-                    
-                    // 更新已完成
-                    updateList('completedList', data.completed);
-                    
-                    // 更新失败
-                    updateList('failedList', data.failed);
-                    
-                    // 更新日志
-                    updateLogs(data.logs);
-                    
-                } catch (error) {
-                    console.error('更新状态失败:', error);
-                }
-            }
-        
-            function updateList(elementId, items) {
-                const listEl = document.getElementById(elementId);
-                listEl.innerHTML = '';
-                
-                items.forEach(item => {
-                    const li = document.createElement('li');
-                    li.className = `task-item status-${item.status || 'pending'}`;
-                    li.textContent = `${item.avid}${item.message ? ' - ' + item.message : ''}`;
-                    listEl.appendChild(li);
-                });
-            }
-            
-            function updateLogs(logs) {
-                const logContainer = document.getElementById('logContainer');
-                logContainer.innerHTML = '';
-                
-                if (logs && logs.length > 0) {
-                    logs.forEach(log => {
-                        const logEntry = document.createElement('div');
-                        logEntry.className = 'log-entry';
-                        
-                        // 根据日志级别添加样式
-                        if (log.includes('ERROR') || log.includes('错误')) {
-                            logEntry.className += ' log-error';
-                        } else if (log.includes('WARNING') || log.includes('警告')) {
-                            logEntry.className += ' log-warning';
-                        } else if (log.includes('DEBUG') || log.includes('调试')) {
-                            logEntry.className += ' log-debug';
-                        } else {
-                            logEntry.className += ' log-info';
-                        }
-                        
-                        logEntry.textContent = log;
-                        logContainer.appendChild(logEntry);
-                    });
-                    // 滚动到底部
-                    logContainer.scrollTop = logContainer.scrollHeight;
-                } else {
-                    logContainer.innerHTML = '<div class="log-entry log-info">暂无日志</div>';
-                }
-            }
-
-            // 每2秒更新一次状态
-            setInterval(updateStatus, 2000);
-            updateStatus(); // 初始加载
-        </script>
-    </body>
-    </html>
-    """
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/tasks/")
 async def add_task(task: DownloadTask):
@@ -456,6 +256,29 @@ async def get_tasks():
         "logs": console_logs[-100:] # 只返回最近100条日志
     }
 
+@app.post("/clear-failed-tasks/")
+async def clear_failed_tasks():
+    """清空所有失败任务"""
+    try:
+        global failed_tasks, download_status
+
+        # 获取当前失败任务的avid列表
+        failed_avids = failed_tasks.copy()
+        failed_tasks.clear()
+
+        for avid in failed_avids:
+            if avid in download_status and download_status[avid].status == "failed":
+                del download_status[avid]
+
+        logger.info(f"已清空 {len(failed_avids)} 个失败任务")
+        return {
+            "message": f"已清空 {len(failed_avids)} 个失败任务",
+            "cleared_count": len(failed_avids)
+        }
+    except Exception as e:
+        logger.error(f"清空失败任务时出错: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.delete("/tasks/{avid}")
 async def remove_task(avid: str):
     try:
@@ -470,6 +293,11 @@ async def remove_task(avid: str):
 async def get_status():
     return await get_tasks()
 
+@app.post("/stop/")
+async def stop_current_download():
+    stop_current_task()
+    return {"message": "停止请求已发送"}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8020)

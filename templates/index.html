@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>流媒体下载器</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>视频下载管理器</h1>
+
+        <div class="section">
+            <h2>添加下载任务</h2>
+            <div class="task-form">
+                <input type="text" id="avidInput" placeholder="输入视频番号 (如: AAA-111)"/>
+                <button class="btn-primary" onclick="addTask()">添加任务</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>当前下载状态</h2>
+            <div id="currentTask">无任务</div>
+            <div class="control-buttons">
+                <button class="btn-danger" id="stopButton" onclick="stopTask()" disabled>停止当前任务</button>
+            </div>
+        </div>
+
+        <div class="two-column">
+            <div class="section">
+                <h2>任务状态</h2>
+
+                <h3>下载队列</h3>
+                <ul class="task-list" id="queueList"></ul>
+
+                <h3>已完成任务</h3>
+                <ul class="task-list" id="completedList"></ul>
+
+                <h3>失败任务</h3>
+                <div class="task-header">
+                    <span>失败任务列表</span>
+                    <button class="btn-clear" id="clearFailedBtn" onclick="clearFailedTasks()" disabled>清空</button>
+                </div>
+                <ul class="task-list" id="failedList"></ul>
+            </div>
+
+            <div class="section">
+                <h2>实时控制台输出</h2>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">系统启动中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
